@@ -1,0 +1,62 @@
+// app.js
+const express = require('express');
+const app = express();
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// In-memory data store (for simplicity)
+let students = [
+  { id: 1, name: 'John Doe', graduationYear: 2022 },
+  { id: 2, name: 'Jane Smith', graduationYear: 2023 },
+  { id: 3, name: 'Alice Johnson', graduationYear: 2021 },
+];
+
+// Get all students
+app.get('/students', (req, res) => {
+  res.json(students);
+});
+
+// Get a student by ID
+app.get('/students/:id', (req, res) => {
+  const student = students.find(s => s.id === parseInt(req.params.id));
+  if (!student) return res.status(404).send('Student not found');
+  res.json(student);
+});
+
+// Add a new student
+app.post('/students', (req, res) => {
+  const { name, graduationYear } = req.body;
+  const newStudent = {
+    id: students.length + 1,
+    name,
+    graduationYear
+  };
+  students.push(newStudent);
+  res.status(201).json(newStudent);
+});
+
+// Update a student's graduation year
+app.put('/students/:id', (req, res) => {
+  const student = students.find(s => s.id === parseInt(req.params.id));
+  if (!student) return res.status(404).send('Student not found');
+
+  const { graduationYear } = req.body;
+  student.graduationYear = graduationYear;
+  res.json(student);
+});
+
+// Delete a student
+app.delete('/students/:id', (req, res) => {
+  const studentIndex = students.findIndex(s => s.id === parseInt(req.params.id));
+  if (studentIndex === -1) return res.status(404).send('Student not found');
+
+  const deletedStudent = students.splice(studentIndex, 1);
+  res.json(deletedStudent);
+});
+
+// Start the server
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
